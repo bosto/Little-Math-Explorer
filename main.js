@@ -64,22 +64,18 @@ document.addEventListener('DOMContentLoaded', function () {
   // 题目生成函数
   function generateProblem(mode) {
     if (mode === 'addition') {
-      // 三位数加法
       const a = Math.floor(Math.random() * 900) + 100;
       const b = Math.floor(Math.random() * 900) + 100;
       return { type: 'addition', a, b, answer: a + b };
     } else if (mode === 'subtraction') {
-      // 三位数减法
-      const minuend = Math.floor(Math.random() * 800) + 200; // 200-999
-      const subtrahend = Math.floor(Math.random() * (minuend - 100 + 1)) + 100; // 100-(minuend-100)
+      const minuend = Math.floor(Math.random() * 800) + 200;
+      const subtrahend = Math.floor(Math.random() * (minuend - 100 + 1)) + 100;
       return { type: 'subtraction', a: minuend, b: subtrahend, answer: minuend - subtrahend };
     } else if (mode === 'multiplication') {
-      // 九九乘法表
       const a = Math.floor(Math.random() * 9) + 1;
       const b = Math.floor(Math.random() * 9) + 1;
       return { type: 'multiplication', a, b, answer: a * b };
     } else if (mode === 'mixed') {
-      // 混合题目
       const modes = ['addition', 'subtraction', 'multiplication'];
       const randomMode = modes[Math.floor(Math.random() * modes.length)];
       return generateProblem(randomMode);
@@ -87,8 +83,8 @@ document.addEventListener('DOMContentLoaded', function () {
     return null;
   }
 
-  // 题目显示函数
-  function renderProblem(problem, inputValue = '', feedback = null, score = 0, qIndex = 1, highScore = 0) {
+  // 题目显示函数（增强版）
+  function renderProblem(problem, answerArr, activeIdx, carryArr, feedback = null, score = 0, qIndex = 1, highScore = 0) {
     const gameContent = document.getElementById('game-content');
     let html = '';
     // 顶部进度与分数
@@ -99,30 +95,67 @@ document.addEventListener('DOMContentLoaded', function () {
         <span class="highscore">最高分：${highScore}</span>
       </div>
     `;
+    // 题目区
     if (problem.type === 'addition' || problem.type === 'subtraction') {
-      // 竖式显示
-      html += `
-        <div class="vertical-problem animated">
-          <div class="num-row">${problem.a}</div>
-          <div class="num-row">${problem.type === 'addition' ? '+' : '-'} ${problem.b}</div>
-          <div class="num-row line">─────</div>
-          <div class="num-row answer-row">${inputValue || '?'}</div>
-        </div>
-      `;
+      // 竖式，右对齐，逐位输入
+      const aStr = problem.a.toString().padStart(3, ' ');
+      const bStr = problem.b.toString().padStart(3, ' ');
+      const ansLen = Math.max(aStr.length, bStr.length, 3) + 1; // 最高位可能进位
+      // 进位/借位标记
+      html += `<div class="vertical-problem enhanced">
+        <div class="carry-row">`;
+      for (let i = 0; i < ansLen; i++) {
+        const mark = carryArr[i] ? (problem.type === 'addition' ? '⬆️' : '⬇️') : '';
+        html += `<span class="carry-cell" data-idx="${i}">${mark}</span>`;
+      }
+      html += `</div>`;
+      // 被加/减数
+      html += `<div class="num-row">`;
+      for (let i = 0; i < ansLen; i++) {
+        html += `<span class="num-cell">${aStr[aStr.length - ansLen + i] || ''}</span>`;
+      }
+      html += `</div>`;
+      // 运算符和加/减数
+      html += `<div class="num-row">`;
+      for (let i = 0; i < ansLen; i++) {
+        if (i === ansLen - bStr.length - 1) {
+          html += `<span class="num-cell">${problem.type === 'addition' ? '+' : '-'}</span>`;
+        } else {
+          html += `<span class="num-cell"></span>`;
+        }
+      }
+      html += `</div><div class="num-row">`;
+      for (let i = 0; i < ansLen; i++) {
+        html += `<span class="num-cell">${bStr[bStr.length - ansLen + i] || ''}</span>`;
+      }
+      html += `</div>`;
+      // 横线
+      html += `<div class="num-row line">`;
+      for (let i = 0; i < ansLen; i++) html += `<span class="num-cell">${i === ansLen - 1 ? '─────' : ''}</span>`;
+      html += `</div>`;
+      // 答案输入区
+      html += `<div class="num-row answer-row">`;
+      for (let i = 0; i < ansLen; i++) {
+        html += `<span class="ans-cell${activeIdx === i ? ' active' : ''}" data-idx="${i}">${answerArr[i] !== undefined ? answerArr[i] : ''}</span>`;
+      }
+      html += `</div></div>`;
     } else if (problem.type === 'multiplication') {
-      // 横式显示
-      html += `
-        <div class="horizontal-problem animated">
-          <span>${problem.a} × ${problem.b} = </span>
-          <span class="answer-row">${inputValue || '?'}</span>
-        </div>
-      `;
+      // 横式，左对齐，逐位输入
+      const aStr = problem.a.toString();
+      const bStr = problem.b.toString();
+      const ansStr = problem.answer.toString();
+      const ansLen = ansStr.length;
+      html += `<div class="horizontal-problem enhanced">
+        <span>${problem.a} × ${problem.b} = </span>`;
+      for (let i = 0; i < ansLen; i++) {
+        html += `<span class="ans-cell${activeIdx === i ? ' active' : ''}" data-idx="${i}">${answerArr[i] !== undefined ? answerArr[i] : ''}</span>`;
+      }
+      html += `</div>`;
     }
     // 答案输入区和数字键盘
     html += `
       <div class="input-area">
         <div id="feedback-area">${feedback ? feedback : ''}</div>
-        <div class="keypad-answer">${inputValue || ''}</div>
         <div class="keypad">
           <button class="key-btn">1</button>
           <button class="key-btn">2</button>
@@ -164,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
       <div class="result-card animated">
         <h2>本次成绩</h2>
         <p>总分：<b>${score}</b></p>
-        <p>最高分：<b>${highScore}</b> ${isNewRecord ? '<span style="color:#e67e22;">新纪录！🎉</span>' : ''}</p>
+        <p>最高分：<b>${highScore}</b> ${isNewRecord ? '<span style=\"color:#e67e22;\">新纪录！🎉</span>' : ''}</p>
         <p>正确率：<b>${percent}%</b> (${correctCount}/${total})</p>
         <p>用时：<b>${formatDuration(durationSec)}</b></p>
         <p class="result-comment">${comment}</p>
@@ -191,7 +224,22 @@ document.addEventListener('DOMContentLoaded', function () {
     gameSection.innerHTML = `<h2>模式：${getModeName(mode)}</h2><div id="game-content"></div>`;
     window._lastMode = mode; // 记录当前模式，便于重玩
     let currentProblem = generateProblem(mode);
-    let inputValue = '';
+    let answerArr, activeIdx, carryArr;
+    if (currentProblem.type === 'addition' || currentProblem.type === 'subtraction') {
+      // 最高位可能进位，答案位数=加数/被减数/结果最大位数+1
+      const aStr = currentProblem.a.toString().padStart(3, ' ');
+      const bStr = currentProblem.b.toString().padStart(3, ' ');
+      const ansLen = Math.max(aStr.length, bStr.length, 3) + 1;
+      answerArr = Array(ansLen).fill(undefined);
+      activeIdx = ansLen - 1; // 默认右侧
+      carryArr = Array(ansLen).fill(false);
+    } else {
+      // 乘法
+      const ansLen = currentProblem.answer.toString().length;
+      answerArr = Array(ansLen).fill(undefined);
+      activeIdx = 0; // 默认左侧
+      carryArr = [];
+    }
     let allowInput = true;
     let score = 0;
     let qIndex = 1;
@@ -209,16 +257,46 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
       currentProblem = generateProblem(mode);
-      inputValue = '';
+      if (currentProblem.type === 'addition' || currentProblem.type === 'subtraction') {
+        const aStr = currentProblem.a.toString().padStart(3, ' ');
+        const bStr = currentProblem.b.toString().padStart(3, ' ');
+        const ansLen = Math.max(aStr.length, bStr.length, 3) + 1;
+        answerArr = Array(ansLen).fill(undefined);
+        activeIdx = ansLen - 1;
+        carryArr = Array(ansLen).fill(false);
+      } else {
+        const ansLen = currentProblem.answer.toString().length;
+        answerArr = Array(ansLen).fill(undefined);
+        activeIdx = 0;
+        carryArr = [];
+      }
       allowInput = true;
-      renderProblem(currentProblem, inputValue, null, score, qIndex, highScore);
-      bindKeypad();
+      renderProblem(currentProblem, answerArr, activeIdx, carryArr, null, score, qIndex, highScore);
+      bindInput();
     }
 
-    function bindKeypad() {
-      // 重新绑定事件
+    function bindInput() {
+      // 进位/借位标记点击
+      document.querySelectorAll('.carry-cell').forEach(cell => {
+        cell.onclick = function () {
+          if (!(currentProblem.type === 'addition' || currentProblem.type === 'subtraction')) return;
+          const idx = parseInt(cell.getAttribute('data-idx'));
+          carryArr[idx] = !carryArr[idx];
+          renderProblem(currentProblem, answerArr, activeIdx, carryArr, null, score, qIndex, highScore);
+          bindInput();
+        };
+      });
+      // 答案格点击
+      document.querySelectorAll('.ans-cell').forEach(cell => {
+        cell.onclick = function () {
+          const idx = parseInt(cell.getAttribute('data-idx'));
+          activeIdx = idx;
+          renderProblem(currentProblem, answerArr, activeIdx, carryArr, null, score, qIndex, highScore);
+          bindInput();
+        };
+      });
+      // 数字键盘
       const keypad = document.querySelector('.keypad');
-      const answerBox = document.querySelector('.keypad-answer');
       if (!keypad) return;
       keypad.querySelectorAll('.key-btn').forEach(btn => {
         btn.onclick = function () {
@@ -226,19 +304,26 @@ document.addEventListener('DOMContentLoaded', function () {
           const val = btn.textContent;
           playSound('click');
           if (val >= '0' && val <= '9') {
-            if (inputValue.length < 5) {
-              inputValue += val;
-              renderProblem(currentProblem, inputValue, null, score, qIndex, highScore);
-              bindKeypad();
+            answerArr[activeIdx] = val;
+            // 自动跳到下一个输入格
+            if (currentProblem.type === 'addition' || currentProblem.type === 'subtraction') {
+              // 右往左
+              if (activeIdx > 0) activeIdx--;
+            } else {
+              // 乘法左往右
+              if (activeIdx < answerArr.length - 1) activeIdx++;
             }
+            renderProblem(currentProblem, answerArr, activeIdx, carryArr, null, score, qIndex, highScore);
+            bindInput();
           } else if (btn.id === 'key-del') {
-            inputValue = inputValue.slice(0, -1);
-            renderProblem(currentProblem, inputValue, null, score, qIndex, highScore);
-            bindKeypad();
+            answerArr[activeIdx] = undefined;
+            renderProblem(currentProblem, answerArr, activeIdx, carryArr, null, score, qIndex, highScore);
+            bindInput();
           } else if (btn.id === 'key-submit') {
-            if (inputValue.length === 0) return;
+            // 检查答案
+            if (answerArr.some(v => v === undefined)) return;
             allowInput = false;
-            const userAns = parseInt(inputValue, 10);
+            const userAns = parseInt(answerArr.join(''), 10);
             if (userAns === currentProblem.answer) {
               correctCount++;
               score += 10;
@@ -249,11 +334,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 score += bonus;
               }
               playSound('correct');
-              // 动画反馈
               renderProblem(
                 currentProblem,
-                inputValue,
-                `<span class="feedback-anim correct">✓</span> <span style="color:green;">真棒！答对啦！${bonus ? '连击奖励+5分！' : ''}</span>`,
+                answerArr,
+                activeIdx,
+                carryArr,
+                `<span class=\"feedback-anim correct\">✓</span> <span style=\"color:green;\">真棒！${bonus ? '连击奖励+5分！' : ''}</span>`,
                 score,
                 qIndex,
                 highScore
@@ -264,16 +350,20 @@ document.addEventListener('DOMContentLoaded', function () {
               playSound('wrong');
               renderProblem(
                 currentProblem,
-                inputValue,
-                '<span class="feedback-anim wrong">✗</span> <span style="color:red;">再想想哦！</span>',
+                answerArr,
+                activeIdx,
+                carryArr,
+                '<span class=\"feedback-anim wrong\">✗</span> <span style=\"color:red;\">再想想哦！</span>',
                 score,
                 qIndex,
                 highScore
               );
               setTimeout(() => {
                 allowInput = true;
-                renderProblem(currentProblem, '', null, score, qIndex, highScore);
-                bindKeypad();
+                // 清空答案
+                answerArr = answerArr.map(() => undefined);
+                renderProblem(currentProblem, answerArr, activeIdx, carryArr, null, score, qIndex, highScore);
+                bindInput();
               }, 1000);
             }
           }
@@ -281,8 +371,8 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    renderProblem(currentProblem, inputValue, null, score, qIndex, highScore);
-    bindKeypad();
+    renderProblem(currentProblem, answerArr, activeIdx, carryArr, null, score, qIndex, highScore);
+    bindInput();
   }
 
   // 模式名称映射
