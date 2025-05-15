@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数学小探险家 Little Math Explorer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>数学小探险家 <span class="en-title">Little Math Explorer</span></h1>
+    <button id="sound-toggle-btn" title="音效开关">🔊</button>
+  </header>
+  <main id="main-content">
+    <section class="mode-select">
+      <h2>请选择游戏模式</h2>
+      <div class="mode-buttons">
+        <button class="mode-btn" data-mode="addition">➕ 加法挑战</button>
+        <button class="mode-btn" data-mode="subtraction">➖ 减法挑战</button>
+        <button class="mode-btn" data-mode="multiplication">✖️ 乘法乐园</button>
+        <button class="mode-btn" data-mode="mixed">🔀 混合速算王</button>
+      </div>
+    </section>
+    <section id="game-section" class="hidden"></section>
+    <section id="result-section" class="hidden"></section>
+  </main>
+  <footer>
+    <small>© 2024 数学小探险家 Little Math Explorer</small>
+  </footer>
+  <script src="main.js"></script>
+</body>
+</html> 

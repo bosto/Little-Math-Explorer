@@ -1,0 +1,207 @@
+body {
+  margin: 0;
+  font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+  background: #f3faff;
+  color: #333;
+}
+header {
+  background: linear-gradient(90deg, #6ee7b7 0%, #a7c7ff 100%);
+  padding: 1.2rem 0 0.6rem 0;
+  text-align: center;
+  border-bottom-left-radius: 2rem;
+  border-bottom-right-radius: 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  position: relative;
+}
+h1 {
+  font-size: 2.2rem;
+  margin: 0;
+  letter-spacing: 2px;
+  color: #2d6a4f;
+}
+.en-title {
+  font-size: 1rem;
+  color: #409eff;
+  margin-left: 0.5rem;
+}
+main {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 2rem 1rem;
+}
+.mode-select {
+  text-align: center;
+  margin-top: 2rem;
+}
+.mode-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+.mode-btn {
+  background: linear-gradient(135deg, #f9d423 0%, #ff4e50 100%);
+  color: #fff;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 1.5rem;
+  padding: 1rem 2.2rem;
+  box-shadow: 0 2px 8px rgba(255, 78, 80, 0.08);
+  cursor: pointer;
+  transition: transform 0.1s, background 0.2s;
+  outline: none;
+}
+.mode-btn:active {
+  transform: scale(0.96);
+  background: linear-gradient(135deg, #ff4e50 0%, #f9d423 100%);
+}
+.hidden {
+  display: none;
+}
+footer {
+  text-align: center;
+  color: #aaa;
+  font-size: 0.9rem;
+  margin: 2rem 0 1rem 0;
+}
+@media (max-width: 600px) {
+  h1 { font-size: 1.4rem; }
+  main { padding: 1rem 0.5rem; }
+  .mode-btn { font-size: 1rem; padding: 0.8rem 1.2rem; }
+}
+
+.game-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  padding: 0.2rem 0.5rem;
+}
+.score {
+  color: #ff9800;
+  font-weight: bold;
+}
+.progress {
+  color: #409eff;
+}
+
+.result-card {
+  background: #fffbe6;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 16px rgba(255, 193, 7, 0.12);
+  max-width: 340px;
+  margin: 2rem auto 0 auto;
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  text-align: center;
+  animation: pop-in 0.5s;
+}
+.result-card h2 {
+  color: #ff9800;
+  margin-bottom: 1rem;
+}
+.result-card p {
+  font-size: 1.1rem;
+  margin: 0.5rem 0;
+}
+.result-comment {
+  color: #43a047;
+  font-size: 1.2rem;
+  margin: 1rem 0 1.5rem 0;
+}
+.result-btns {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+}
+.result-btns button {
+  background: linear-gradient(135deg, #6ee7b7 0%, #a7c7ff 100%);
+  color: #333;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 1.2rem;
+  padding: 0.7rem 1.6rem;
+  box-shadow: 0 2px 8px rgba(67, 160, 71, 0.08);
+  cursor: pointer;
+  transition: transform 0.1s, background 0.2s;
+}
+.result-btns button:active {
+  transform: scale(0.96);
+  background: linear-gradient(135deg, #a7c7ff 0%, #6ee7b7 100%);
+}
+
+.animated {
+  animation: pop-in 0.4s;
+}
+@keyframes pop-in {
+  0% { transform: scale(0.7); opacity: 0; }
+  80% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.feedback-anim {
+  display: inline-block;
+  font-size: 2.2rem;
+  vertical-align: middle;
+  animation: bounce 0.5s;
+}
+.feedback-anim.correct {
+  color: #43a047;
+}
+.feedback-anim.wrong {
+  color: #e53935;
+}
+@keyframes bounce {
+  0% { transform: scale(0.7); }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* 优化题目区和按钮的过渡 */
+.vertical-problem, .horizontal-problem {
+  margin: 1.2rem auto 1.2rem auto;
+  font-size: 2rem;
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.08);
+  width: 220px;
+  padding: 1rem 0.5rem 0.7rem 0.5rem;
+  text-align: right;
+  letter-spacing: 2px;
+  transition: box-shadow 0.2s;
+}
+.vertical-problem:active, .horizontal-problem:active {
+  box-shadow: 0 4px 16px rgba(64, 158, 255, 0.16);
+}
+
+.keypad-answer {
+  min-height: 2.2rem;
+  font-size: 1.5rem;
+  text-align: center;
+  margin: 0.5rem 0 0.7rem 0;
+  color: #409eff;
+  letter-spacing: 2px;
+  font-weight: bold;
+}
+
+#sound-toggle-btn {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.5rem;
+  background: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  box-shadow: 0 2px 8px rgba(64,158,255,0.08);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  outline: none;
+  z-index: 10;
+}
+#sound-toggle-btn:active {
+  background: #e0f7fa;
+  transform: scale(0.92);
+} 
